@@ -17,4 +17,4 @@ services:
 
 databases:
   - name: zss-db
-    plan: free
+plan: free
