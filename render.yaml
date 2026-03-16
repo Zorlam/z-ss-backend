@@ -2,6 +2,7 @@ services:
   - type: web
     name: zss-backend
     env: python
+    runtime: python-3.11  # ADD THIS LINE - Forces Python 3.11
     buildCommand: "pip install -r requirements.txt"
     startCommand: "waitress-serve --port=$PORT run:app"
     envVars:
