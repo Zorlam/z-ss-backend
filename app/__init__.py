@@ -1,6 +1,6 @@
 from flask import Flask
 from .config import get_config
-from .extensions import db, jwt, bcrypt, cors, migrate, limiter
+from .extensions import db, jwt, bcrypt, cors, limiter
 from app.wishlist.routes import wishlist_bp
 
 
@@ -13,7 +13,6 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     bcrypt.init_app(app)
-    migrate.init_app(app, db)
     cors.init_app(
         app,
         resources={r"/api/*": {"origins": "*"}},
