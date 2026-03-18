@@ -2,7 +2,7 @@ from app import create_app
 from app.extensions import db
 from app.auth.models import User
 from app.products.models import Product, Category
-from app.cart.models import Cart, CartItem
+from app.cart.models import CartItem
 from app.orders.models import Order, OrderItem
 from app.recommendations.models import BrowsingHistory
 from app.wishlist.models import Wishlist
