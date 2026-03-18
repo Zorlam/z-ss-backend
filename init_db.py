@@ -1,22 +1,43 @@
 from app import create_app
-from app.extensions import db, migrate
-from flask_migrate import init, migrate as mig, upgrade
+from app.extensions import db
+from app.auth.models import User
+from app.products.models import Product, Category
+from app.cart.models import Cart, CartItem
+from app.orders.models import Order, OrderItem
+from app.recommendations.models import BrowsingHistory
+from app.wishlist.models import Wishlist
 
-app = create_app()
+def init_database():
+    """Initialize the database with all tables"""
+    app = create_app()
+    
+    with app.app_context():
+        # Drop all tables (WARNING: This deletes all data!)
+        # db.drop_all()
+        
+        # Create all tables
+        db.create_all()
+        
+        print("✅ Database tables created successfully!")
+        
+        # Create admin user if it doesn't exist
+        admin = User.query.filter_by(email='admin@clothingai.com').first()
+        if not admin:
+            from app.extensions import bcrypt
+            admin = User(
+                username='admin',
+                email='admin@clothingai.com',
+                password_hash=bcrypt.generate_password_hash('Admin123!').decode('utf-8'),
+                role='admin',
+                is_active=True
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("✅ Admin user created!")
+            print("   Email: admin@clothingai.com")
+            print("   Password: Admin123!")
+        else:
+            print("ℹ️  Admin user already exists")
 
-with app.app_context():
-    # Initialize migrations
-    try:
-        init()
-        print("✅ Migrations folder created")
-    except:
-        print("ℹ️  Migrations folder already exists")
-    
-    # Create migration
-    mig(message="Initial schema")
-    print("✅ Migration files created")
-    
-    # Apply migration
-    upgrade()
-    print("✅ Database tables created")
-    print("🎉 Database setup complete!")
+if __name__ == '__main__':
+    init_database()
