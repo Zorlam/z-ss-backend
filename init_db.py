@@ -12,9 +12,6 @@ def init_database():
     app = create_app()
     
     with app.app_context():
-        # Drop all tables (WARNING: This deletes all data!)
-        # db.drop_all()
-        
         # Create all tables
         db.create_all()
         
