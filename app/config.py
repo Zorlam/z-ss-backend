@@ -8,6 +8,7 @@ load_dotenv()
 class Config:
     # Core
     SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-secret-key")
+    JWT_COOKIE_CSRF_PROTECT = False
     DEBUG = False
 
     # Database - Auto-detects SQLite or PostgreSQL
