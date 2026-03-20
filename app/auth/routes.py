@@ -20,19 +20,14 @@ users_response_schema = UserResponseSchema(many=True)
 
 
 @auth_bp.route("/register", methods=["POST"])
-@limiter.limit("3 per hour")  # ← ADDED: Only 3 registrations per hour
+@limiter.limit("10 per hour")
 def register():
     try:
         data = register_schema.load(request.get_json())
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 422
-
-    if User.query.filter_by(email=data["email"]).first():
-        return jsonify({"error": "Email already registered"}), 409
-
-    if User.query.filter_by(username=data["username"]).first():
-        return jsonify({"error": "Username already taken"}), 409
-    #BACKEND VALIDATION - ADD THIS
+    
+    # BACKEND VALIDATION
     username = data.get('username', '').strip()
     email = data.get('email', '').strip()
     password = data.get('password', '')
@@ -51,7 +46,13 @@ def register():
     
     # Update data with cleaned values
     data['username'] = username
-    data['email'] = email.lower()  # Normalize email to lowercase
+    data['email'] = email.lower()
+
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "Email already registered"}), 409
+
+    if User.query.filter_by(username=data["username"]).first():
+        return jsonify({"error": "Username already taken"}), 409
 
     password_hash = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
 
@@ -73,7 +74,7 @@ def register():
 
 
 @auth_bp.route("/login", methods=["POST"])
-@limiter.limit("30 per minute")  # ← ADDED: Only 5 login attempts per minute
+@limiter.limit("50 per minute")
 def login():
     try:
         data = login_schema.load(request.get_json())
