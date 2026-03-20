@@ -73,7 +73,7 @@ def register():
 
 
 @auth_bp.route("/login", methods=["POST"])
-@limiter.limit("5 per minute")  # ← ADDED: Only 5 login attempts per minute
+@limiter.limit("30 per minute")  # ← ADDED: Only 5 login attempts per minute
 def login():
     try:
         data = login_schema.load(request.get_json())
