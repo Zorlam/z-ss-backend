@@ -12,7 +12,7 @@ wishlist_bp = Blueprint("wishlist", __name__)
 @jwt_required()
 def get_wishlist():
     """Get user's wishlist"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
     
@@ -21,11 +21,15 @@ def get_wishlist():
     }), 200
 
 
-@wishlist_bp.route("/<int:product_id>", methods=["POST"])
+@wishlist_bp.route("/", methods=["POST"])
 @jwt_required()
-def add_to_wishlist(product_id):
+def add_to_wishlist():
     """Add product to wishlist"""
-    user_id = get_jwt_identity()
+    from flask import request
+    user_id = int(get_jwt_identity())
+    
+    data = request.get_json()
+    product_id = data.get('product_id')
     
     # Check if product exists
     product = Product.query.get_or_404(product_id)
@@ -50,7 +54,7 @@ def add_to_wishlist(product_id):
 @jwt_required()
 def remove_from_wishlist(product_id):
     """Remove product from wishlist"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first_or_404()
     
@@ -64,7 +68,7 @@ def remove_from_wishlist(product_id):
 @jwt_required()
 def check_wishlist(product_id):
     """Check if product is in wishlist"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     exists = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first() is not None
     
