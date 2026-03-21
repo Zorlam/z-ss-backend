@@ -20,12 +20,18 @@ users_response_schema = UserResponseSchema(many=True)
 
 
 @auth_bp.route("/register", methods=["POST"])
-@limiter.limit("10 per hour")
+@limiter.limit("3 per hour")
 def register():
     try:
         data = register_schema.load(request.get_json())
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 422
+
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "Email already registered"}), 409
+
+    if User.query.filter_by(username=data["username"]).first():
+        return jsonify({"error": "Username already taken"}), 409
     
     # BACKEND VALIDATION
     username = data.get('username', '').strip()
@@ -48,12 +54,6 @@ def register():
     data['username'] = username
     data['email'] = email.lower()
 
-    if User.query.filter_by(email=data["email"]).first():
-        return jsonify({"error": "Email already registered"}), 409
-
-    if User.query.filter_by(username=data["username"]).first():
-        return jsonify({"error": "Username already taken"}), 409
-
     password_hash = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
 
     user = User(
@@ -65,7 +65,7 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     return jsonify({
         "message": "User registered successfully",
         "access_token": access_token,
@@ -74,7 +74,7 @@ def register():
 
 
 @auth_bp.route("/login", methods=["POST"])
-@limiter.limit("50 per minute")
+@limiter.limit("5 per minute")
 def login():
     try:
         data = login_schema.load(request.get_json())
@@ -89,7 +89,7 @@ def login():
     if not user.is_active:
         return jsonify({"error": "Account is deactivated"}), 403
 
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     return jsonify({
         "message": "Login successful",
         "access_token": access_token,
@@ -101,7 +101,7 @@ def login():
 @jwt_required()
 def get_current_user():
     user_id = get_jwt_identity()
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(int(user_id))
     return jsonify({"user": user_response_schema.dump(user)}), 200
 
 
