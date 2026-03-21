@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import logging
 from flask_jwt_extended import (
     create_access_token,
     jwt_required,
@@ -25,6 +26,7 @@ def register():
     try:
         data = register_schema.load(request.get_json())
     except ValidationError as err:
+        logging.error(f"Registration validation error: {err.messages}")
         return jsonify({"errors": err.messages}), 422
 
     if User.query.filter_by(email=data["email"]).first():
