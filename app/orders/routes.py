@@ -17,7 +17,7 @@ status_schema = UpdateOrderStatusSchema()
 @orders_bp.route("/", methods=["POST"])
 @jwt_required()
 def create_order():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
 
     try:
         data = create_schema.load(request.get_json())
@@ -72,7 +72,7 @@ def create_order():
 @orders_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_my_orders():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
 
@@ -96,13 +96,13 @@ def get_my_orders():
 @orders_bp.route("/<int:order_id>", methods=["GET"])
 @jwt_required()
 def get_order(order_id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     order = Order.query.get_or_404(order_id)
 
     # Users can only see their own orders; admins can see all
     from app.auth.models import User
-    user = User.query.get(user_id)
-    if order.user_id != user_id and user.role != "admin":
+    user = User.query.get(int(user_id))
+    if order.user_id != int(user_id) and user.role != "admin":
         return jsonify({"error": "Access denied"}), 403
 
     return jsonify({"order": order.to_dict()}), 200
@@ -111,7 +111,7 @@ def get_order(order_id):
 @orders_bp.route("/<int:order_id>/cancel", methods=["PATCH"])
 @jwt_required()
 def cancel_order(order_id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     order = Order.query.filter_by(id=order_id, user_id=user_id).first_or_404()
 
     if order.status not in ["pending", "confirmed"]:

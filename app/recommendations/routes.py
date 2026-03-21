@@ -14,7 +14,7 @@ recommendations_bp = Blueprint('recommendations', __name__)
 @jwt_required()
 def get_recommendations():
     """Get smart product recommendations based on browsing history (no AI required)"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     try:
         recommendations = get_smart_recommendations(user_id, limit=6)  # Changed to 6

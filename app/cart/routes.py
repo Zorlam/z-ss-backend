@@ -16,7 +16,7 @@ update_schema = UpdateCartSchema()
 @cart_bp.route("/", methods=["GET"])
 @jwt_required()
 def view_cart():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     items = CartItem.query.filter_by(user_id=user_id).all()
 
     total = sum(
@@ -35,7 +35,7 @@ def view_cart():
 @cart_bp.route("/", methods=["POST"])
 @jwt_required()
 def add_to_cart():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
 
     try:
         data = add_schema.load(request.get_json())
@@ -74,7 +74,7 @@ def add_to_cart():
 @cart_bp.route("/<int:item_id>", methods=["PUT"])
 @jwt_required()
 def update_cart_item(item_id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     item = CartItem.query.filter_by(id=item_id, user_id=user_id).first_or_404()
 
     try:
@@ -93,7 +93,7 @@ def update_cart_item(item_id):
 @cart_bp.route("/<int:item_id>", methods=["DELETE"])
 @jwt_required()
 def remove_from_cart(item_id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     item = CartItem.query.filter_by(id=item_id, user_id=user_id).first_or_404()
     db.session.delete(item)
     db.session.commit()
@@ -103,7 +103,7 @@ def remove_from_cart(item_id):
 @cart_bp.route("/clear", methods=["DELETE"])
 @jwt_required()
 def clear_cart():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     CartItem.query.filter_by(user_id=user_id).delete()
     db.session.commit()
     return jsonify({"message": "Cart cleared"}), 200

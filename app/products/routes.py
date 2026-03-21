@@ -222,8 +222,9 @@ def upload_image():
         if not image_url:
             return jsonify({"error": "Failed to save image"}), 400
         
-        # Return full URL with host
-        host = request.host_url.rstrip('/')
+        # Return full URL with host - Use HTTPS in production
+        scheme = 'https' if request.host != 'localhost' and request.host != '127.0.0.1' else 'http'
+        host = f"{scheme}://{request.host}"
         full_url = f"{host}{image_url}"
         return jsonify({"image_url": full_url}), 200
     except ValueError as e:
