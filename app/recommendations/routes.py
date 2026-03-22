@@ -56,3 +56,30 @@ def get_recommendations():
         }), 200
     
     return jsonify({"recommendations": []}), 200
+@recommendations_bp.route('/track/<int:product_id>', methods=['POST'])
+@jwt_required()
+def track_view(product_id):
+    """Track when a user views a product"""
+    from app.extensions import db
+    from datetime import datetime, timedelta
+    
+    user_id = int(get_jwt_identity())
+    
+    # Check if product exists
+    product = Product.query.get_or_404(product_id)
+    
+    # Check if already viewed recently (within last hour)
+    recent_view = BrowsingHistory.query.filter_by(
+        user_id=user_id,
+        product_id=product_id
+    ).filter(
+        BrowsingHistory.viewed_at > datetime.utcnow() - timedelta(hours=1)
+    ).first()
+    
+    if not recent_view:
+        # Add new browsing history entry
+        history_entry = BrowsingHistory(user_id=user_id, product_id=product_id)
+        db.session.add(history_entry)
+        db.session.commit()
+    
+    return jsonify({"message": "View tracked"}), 200
