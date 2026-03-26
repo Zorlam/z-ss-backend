@@ -4,5 +4,4 @@ __pycache__/
 *.pyc
 venv/
 .vscode/
-app/static/uploads/
 migrations/versions/*.pyc
